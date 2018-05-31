@@ -1,0 +1,7 @@
+**/*.pyc
+img.jpg
+**/__pycache__/
+env/
+auth_handler.key
+**/*.swp
+
