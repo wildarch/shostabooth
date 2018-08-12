@@ -11,7 +11,10 @@ from button import Button
 
 PHOTO_DIR='photos/'
 PICTURE_TIMEOUT = 6
+
 SLIDESHOW_TIME_PER_PHOTO = 1
+SLIDESHOW_DEFAULT_IMAGE = 'dmitri.jpg'
+
 BUTTON_GPIO_PIN = 18
 BUTTON_KEYBOARD_KEY = 's'
 BUTTON_PRESS_TIME = 2
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     #cv2.namedWindow('webcam', cv2.WND_PROP_FULLSCREEN)
     #cv2.setWindowProperty("webcam",cv2.WND_PROP_FULLSCREEN, 1)
 
-    slideshow = Slideshow(PHOTO_DIR, SLIDESHOW_TIME_PER_PHOTO)
+    slideshow = Slideshow(PHOTO_DIR, SLIDESHOW_TIME_PER_PHOTO, SLIDESHOW_DEFAULT_IMAGE)
     button = Button(BUTTON_GPIO_PIN, BUTTON_KEYBOARD_KEY)
     
     try:

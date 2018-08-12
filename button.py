@@ -12,6 +12,7 @@ class Button:
                 pull_up_down=GPIO.PUD_UP
             )
             self.use_gpio = True
+            self.GPIO = GPIO
         except ImportError:
             self.use_gpio = False
             print("No GPIO library found, " \
@@ -25,7 +26,7 @@ class Button:
 
     def pressed(self, min_press_time=0, key_state=None):
         if self.use_gpio:
-            input_state = not GPIO.input(18)
+            input_state = not self.GPIO.input(18)
         else:
             if key_state is None:
                 raise ValueError("you must provide a key_state to function pressed" \
@@ -37,16 +38,12 @@ class Button:
 
         if input_state == True and self.press_start_time is None:
             self.press_start_time = time.time()
-            print("Pressed")
         elif input_state == False and self.press_start_time is not None:
             self.debounce_counter -= 1
             if self.debounce_counter == 0:
                 self.press_start_time = None
-                print("Not pressed anymore {}")
 
         if self.press_start_time is None:
             return False
         else:
             return (time.time() - self.press_start_time) > min_press_time
-
-
