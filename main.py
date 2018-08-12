@@ -19,6 +19,11 @@ BUTTON_GPIO_PIN = 18
 BUTTON_KEYBOARD_KEY = 's'
 BUTTON_PRESS_TIME = 2
 
+def flip_image(img):
+        rows, cols, _ = img.shape
+        M = cv2.getRotationMatrix2D((cols/2,rows/2),180,1)
+        return cv2.warpAffine(img, M, (cols,rows))
+
 def save_photo(img):
     time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     path = "{}{}.jpg".format(PHOTO_DIR, time)
@@ -48,8 +53,8 @@ if __name__ == '__main__':
     webcam = cv2.VideoCapture(0)
 
     # Create a full-screen window
-    #cv2.namedWindow('webcam', cv2.WND_PROP_FULLSCREEN)
-    #cv2.setWindowProperty("webcam",cv2.WND_PROP_FULLSCREEN, 1)
+    cv2.namedWindow('webcam', cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty("webcam",cv2.WND_PROP_FULLSCREEN, 1)
 
     slideshow = Slideshow(PHOTO_DIR, SLIDESHOW_TIME_PER_PHOTO, SLIDESHOW_DEFAULT_IMAGE)
     button = Button(BUTTON_GPIO_PIN, BUTTON_KEYBOARD_KEY)
@@ -58,6 +63,7 @@ if __name__ == '__main__':
         while True:
             k = cv2.waitKey(1) & 0xFF
             _, img = webcam.read()
+            img = flip_image(img)
             cv2.imshow('webcam', img)
             if k == 27:
                 # Escape key pressed
