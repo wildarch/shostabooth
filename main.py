@@ -8,6 +8,7 @@ import os
 import math
 from slideshow import Slideshow
 from button import Button
+from subprocess import call
 
 PHOTO_DIR='photos/'
 PICTURE_TIMEOUT = 6
@@ -62,9 +63,6 @@ if __name__ == '__main__':
     try:
         while True:
             k = cv2.waitKey(1) & 0xFF
-            _, img = webcam.read()
-            img = flip_image(img)
-            cv2.imshow('webcam', img)
             if k == 27:
                 # Escape key pressed
                 print("Goodbye!")
@@ -73,6 +71,12 @@ if __name__ == '__main__':
                 picture_time = time.time() + PICTURE_TIMEOUT
 
             if picture_time is not None:
+                _, img = webcam.read()
+                if img is None:
+                    print("Camera read failed")
+                    call(["sudo", "systemctl", "-i", "reboot"])
+                img = flip_image(img)
+
                 time_left = math.ceil(picture_time - time.time())
 
                 with_text = img.copy()
