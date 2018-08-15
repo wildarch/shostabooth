@@ -34,7 +34,7 @@ class Button:
             input_state = (key_state & 0xff) == ord(self.keyboard_key)
 
         if input_state == True:
-            self.debounce_counter = 2
+            self.debounce_counter = 4
 
         if input_state == True and self.press_start_time is None:
             self.press_start_time = time.time()

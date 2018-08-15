@@ -20,6 +20,8 @@ BUTTON_GPIO_PIN = 18
 BUTTON_KEYBOARD_KEY = 's'
 BUTTON_PRESS_TIME = 2
 
+WINDOW_NAME = 'shostabooth'
+
 def flip_image(img):
         rows, cols, _ = img.shape
         M = cv2.getRotationMatrix2D((cols/2,rows/2),180,1)
@@ -41,6 +43,9 @@ def put_text_center(img, text):
 
     cv2.putText(img, text, (int(x), int(y)), FONT, SCALE, (0, 0, 255), THICKNESS)
 
+class CameraException(Exception):
+    pass
+
 if __name__ == '__main__':
     try:
         os.mkdir(PHOTO_DIR)
@@ -50,19 +55,19 @@ if __name__ == '__main__':
 
     picture_time = None
 
-    # Open webcam first one found
-    webcam = cv2.VideoCapture(0)
+    # Only open the webcam once we're starting to take a picture
+    webcam = None
 
     # Create a full-screen window
-    cv2.namedWindow('webcam', cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty("webcam",cv2.WND_PROP_FULLSCREEN, 1)
+    cv2.namedWindow(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty(WINDOW_NAME,cv2.WND_PROP_FULLSCREEN, 1)
 
     slideshow = Slideshow(PHOTO_DIR, SLIDESHOW_TIME_PER_PHOTO, SLIDESHOW_DEFAULT_IMAGE)
     button = Button(BUTTON_GPIO_PIN, BUTTON_KEYBOARD_KEY)
     
     try:
         while True:
-            k = cv2.waitKey(1) & 0xFF
+            k = cv2.waitKey(10) & 0xFF
             if k == 27:
                 # Escape key pressed
                 print("Goodbye!")
@@ -71,10 +76,12 @@ if __name__ == '__main__':
                 picture_time = time.time() + PICTURE_TIMEOUT
 
             if picture_time is not None:
+                if webcam is None:
+                    webcam = cv2.VideoCapture(0)
                 _, img = webcam.read()
                 if img is None:
                     print("Camera read failed")
-                    call(["sudo", "systemctl", "-i", "reboot"])
+                    raise CameraError("Could not read from camera")
                 img = flip_image(img)
 
                 time_left = math.ceil(picture_time - time.time())
@@ -90,10 +97,17 @@ if __name__ == '__main__':
                     picture_time = None
                     save_photo(img)
                     slideshow.refresh()
-                cv2.imshow('webcam', with_text)
+                    webcam.release()
+                    webcam = None
+                cv2.imshow(WINDOW_NAME, with_text)
             else:
                 # TODO slideshow
-                cv2.imshow('webcam', slideshow.get_current_image())
+                cv2.imshow(WINDOW_NAME, slideshow.get_current_image())
     except KeyboardInterrupt:
-        webcam.release()
+        if webcam is not None:
+            webcam.release()
         cv2.destroyAllWindows()
+    except CameraError as e:
+        print(e)
+        print("Attempting to reboot device")
+        call(["sudo", "systemctl", "-i", "reboot"])
