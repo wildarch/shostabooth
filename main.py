@@ -13,7 +13,7 @@ from subprocess import call
 PHOTO_DIR='photos/'
 PICTURE_TIMEOUT = 6
 
-SLIDESHOW_TIME_PER_PHOTO = 1
+SLIDESHOW_TIME_PER_PHOTO = 5
 SLIDESHOW_DEFAULT_IMAGE = 'dmitri.jpg'
 
 BUTTON_GPIO_PIN = 18
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     
     try:
         while True:
-            k = cv2.waitKey(10) & 0xFF
+            k = cv2.waitKey(30) & 0xFF
             if k == 27:
                 # Escape key pressed
                 print("Goodbye!")
@@ -81,7 +81,7 @@ if __name__ == '__main__':
                 _, img = webcam.read()
                 if img is None:
                     print("Camera read failed")
-                    raise CameraError("Could not read from camera")
+                    raise CameraException("Could not read from camera")
                 img = flip_image(img)
 
                 time_left = math.ceil(picture_time - time.time())
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         if webcam is not None:
             webcam.release()
         cv2.destroyAllWindows()
-    except CameraError as e:
+    except CameraException as e:
         print(e)
         print("Attempting to reboot device")
         call(["sudo", "systemctl", "-i", "reboot"])
